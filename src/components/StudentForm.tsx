@@ -484,8 +484,15 @@ export const StudentForm: React.FC<Props> = ({
       finalSessionsList = parseSessionsText(sessionsText);
     }
 
+    const generateSecureId = () => {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return `stu_${crypto.randomUUID().replace(/-/g, '').substring(0, 16)}`;
+      }
+      return `stu_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    };
+
     const studentData: Student = {
-      id: initialStudent?.id || `stu_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: initialStudent?.id || generateSecureId(),
       name: name.trim(),
       phone: phone.trim(),
       month,

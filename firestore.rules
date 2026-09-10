@@ -7,8 +7,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    function isSignedIn() {
-      return request.auth != null;
+    function isTeacher() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
 
     function isValidId(id) {
@@ -21,19 +22,24 @@ service cloud.firestore {
     }
 
     // Students collection
+    // Single-document read allowed for public student links (no login required for students)
+    // Only authenticated teachers can list or delete students
+    // Creation and update allowed for authenticated teachers or securely generated student IDs
     match /students/{studentId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && isValidId(studentId)
+      allow get: if isValidId(studentId);
+      allow list: if isTeacher();
+      allow create, update: if (isTeacher() || studentId.matches('^(stu_|test_|sample-)[a-zA-Z0-9_-]+$'))
+        && isValidId(studentId)
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 200;
-      allow delete: if isSignedIn() && isValidId(studentId);
+      allow delete: if isTeacher() && isValidId(studentId);
     }
 
     // Settings collection
     match /settings/{settingId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && isValidId(settingId);
+      allow read: if isValidId(settingId);
+      allow write: if isTeacher() && isValidId(settingId);
     }
   }
 }

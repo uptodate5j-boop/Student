@@ -91,54 +91,13 @@ export function parseSessionsText(text: string): SessionItem[] {
   });
 }
 
+// Student data is strictly stored in Firestore and NOT in localStorage
 export function loadStudents(): Student[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      // Initialize with sample student if completely empty
-      saveStudents(INITIAL_SAMPLE_STUDENTS);
-      return INITIAL_SAMPLE_STUDENTS;
-    }
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-
-    // Normalize and ensure each student has an ID and proper sessions
-    return parsed.map((item, index) => {
-      const id = String(item.id || item.code || `std-${Date.now()}-${index}`);
-      const sessionsList: SessionItem[] =
-        Array.isArray(item.sessionsList) && item.sessionsList.length > 0
-          ? item.sessionsList
-          : parseSessionsText(item.sessionsText || item.sessions || '');
-
-      return {
-        id,
-        name: item.name || 'بدون نام',
-        phone: item.phone || '',
-        month: item.month || 'ماه جاری',
-        totalSessions: Number(item.totalSessions || item.sessionsCount || sessionsList.length || 0),
-        sessionsText: item.sessionsText || item.sessions || '',
-        sessionsList,
-        subject: item.subject || '',
-        fee: item.fee || '',
-        paymentStatus: item.paymentStatus || 'در انتظار پرداخت',
-        notes: item.notes || '',
-        customValues: item.customValues || {},
-        createdAt: item.createdAt || Date.now(),
-        updatedAt: item.updatedAt,
-      };
-    });
-  } catch (err) {
-    console.error('Failed to load students from localStorage:', err);
-    return [];
-  }
+  return [];
 }
 
-export function saveStudents(students: Student[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-  } catch (err) {
-    console.error('Failed to save students to localStorage:', err);
-  }
+export function saveStudents(_students: Student[]): void {
+  // Intentionally no-op: Student data is stored in Firebase Firestore, not localStorage.
 }
 
 export function loadSettings(): TeacherSettings {
@@ -299,11 +258,10 @@ export function decodeStudentFromUrl(rawStr: string): DecodedStudentPayload | nu
   }
 }
 
-// Generate the full shareable URL
-export function generateShareUrl(student: Student, teacherSettings?: TeacherSettings): string {
-  const code = encodeStudentForUrl(student, teacherSettings);
+// NOTE: Student data is strictly stored in Firestore and NOT in localStorage as per requirement.
+export function generateShareUrl(student: Student, _teacherSettings?: TeacherSettings): string {
   const base = window.location.origin + window.location.pathname;
-  return `${base}?data=${code}`;
+  return `${base}?studentId=${encodeURIComponent(student.id)}`;
 }
 
 // Format message for WhatsApp or SMS

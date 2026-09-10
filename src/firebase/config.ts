@@ -1,6 +1,14 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import { getAuth, signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
+  Unsubscribe,
+} from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase App
@@ -16,14 +24,14 @@ const databaseId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestor
 
 export const db = getFirestore(firebaseApp, databaseId);
 
-// Test Firestore connection on boot (as required by system guidelines)
+// Test Firestore connection on boot
 export async function testConnection(): Promise<boolean> {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
     return true;
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('Firebase client is offline, using local storage.');
+      console.warn('Firebase client is offline.');
     } else {
       console.warn('Firestore connection check notice:', error);
     }
@@ -31,39 +39,39 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Ensure an authenticated session (anonymous auth) so request.auth is populated
-let currentUser: User | null = null;
-let authPromise: Promise<User | null> | null = null;
+// Google Provider for Teacher Authentication
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-export function ensureAuth(): Promise<User | null> {
-  if (currentUser) return Promise.resolve(currentUser);
-  if (authPromise) return authPromise;
-
-  authPromise = new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        unsubscribe();
-        resolve(user);
-      } else {
-        try {
-          const cred = await signInAnonymously(auth);
-          currentUser = cred.user;
-          unsubscribe();
-          resolve(cred.user);
-        } catch (err) {
-          console.warn('Anonymous auth failed or offline:', err);
-          unsubscribe();
-          resolve(null);
-        }
-      }
-    });
-  });
-
-  return authPromise;
+/**
+ * Sign in teacher using Firebase Auth with Google Sign-In popup
+ */
+export async function signInTeacherWithGoogle(): Promise<User> {
+  const result = await signInWithPopup(auth, googleProvider);
+  return result.user;
 }
 
-// Start auth & test connection immediately
-ensureAuth().then(() => {
-  testConnection();
-});
+/**
+ * Sign out teacher
+ */
+export async function signOutTeacher(): Promise<void> {
+  await signOut(auth);
+}
+
+/**
+ * Get current authenticated user
+ */
+export async function ensureAuth(): Promise<User | null> {
+  return auth.currentUser;
+}
+
+/**
+ * Listen to teacher authentication state
+ */
+export function subscribeTeacherAuth(callback: (user: User | null) => void): Unsubscribe {
+  return onAuthStateChanged(auth, callback);
+}
+
+// Test connection on boot
+testConnection();
+
