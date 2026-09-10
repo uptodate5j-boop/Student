@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student information, planned sessions, payments, and notes.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the student."
+        },
+        "name": {
+          "type": "string",
+          "description": "Student full name.",
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "description": "Student or parent contact phone number.",
+          "maxLength": 30
+        },
+        "month": {
+          "type": "string",
+          "description": "Academic or training month label.",
+          "maxLength": 50
+        },
+        "totalSessions": {
+          "type": "number",
+          "description": "Total number of planned sessions."
+        },
+        "sessionsText": {
+          "type": "string",
+          "description": "Raw text representation of sessions."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Sport, instrument, or academic subject."
+        },
+        "fee": {
+          "type": "string",
+          "description": "Tuition fee."
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Current payment status."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes and reminders."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp in milliseconds."
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Last updated timestamp in milliseconds."
+        }
+      },
+      "required": ["id", "name"]
+    },
+    "TeacherSettings": {
+      "title": "TeacherSettings",
+      "description": "General settings, institute name, coach profile, theme, and custom fields.",
+      "type": "object",
+      "properties": {
+        "teacherName": {
+          "type": "string",
+          "description": "Name of the coach or teacher."
+        },
+        "instituteName": {
+          "type": "string",
+          "description": "Name of the institute, club, or school."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Coach contact phone."
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Last updated timestamp."
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Student documents collection."
+    },
+    "/settings/{settingId}": {
+      "schema": "TeacherSettings",
+      "description": "Application settings documents."
+    }
+  }
+}

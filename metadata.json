@@ -1,0 +1,6 @@
+{
+  "name": "مدیریت برنامه کلاس شاگردان",
+  "description": "سامانه مدیریت و ارسال روز و ساعت جلسات کلاس شاگردان با همگام‌سازی ابری Firebase Firestore، کارکرد آفلاین، چاپ فیش، تولید لینک هوشمند و خروجی تک‌فایل HTML",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
